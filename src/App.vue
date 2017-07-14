@@ -1,23 +1,22 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
+    <m-header></m-header>  
+    <tab></tab>
     <router-view></router-view>
   </div>
 </template>
 
 <script>
+import mHeader from 'components/m-header/m-header'
+import tab from 'components/tab/tab.vue'
 export default {
-  name: 'app'
+  components: {
+    mHeader,
+    tab
+  }
 }
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>

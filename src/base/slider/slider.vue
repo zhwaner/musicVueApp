@@ -55,7 +55,6 @@
     },
     methods: {
       _setSliderWidth(isResize) {
-        console.log(this.$refs.sliderGroup)
         this.children = this.$refs.sliderGroup.children
         let width = 0
         let sliderWidth = this.$refs.slider.clientWidth
@@ -68,8 +67,8 @@
         }
 
         if (this.loop && !isResize) {
+        // 改变屏幕大小时，若loop为1，此时上面已经children.length已经加2了，所以这里跳过
           width += 2 * sliderWidth
-          console.log(width)
         }
         this.$refs.sliderGroup.style.width = width + 'px'
       },

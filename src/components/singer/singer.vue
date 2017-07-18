@@ -9,6 +9,6 @@ export default {
 }
 </script>
 
-<style type="stylus">
+<style lang="stylus">
 
 </style>

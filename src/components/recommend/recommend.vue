@@ -1,6 +1,6 @@
 <template>
   <div class="recommend">
-    <div class="recommend-content">
+    <Scroll class="recommend-content" :data="discList">
       <div v-if="recommends.length" class="slider-wrapper">
         <slider>
           <div v-for="item in recommends">
@@ -24,12 +24,13 @@
           </li>
         </ul>
       </div>
-    </div>
+    </Scroll>
   </div>
 </template>
 
 <script>
   import Slider from 'base/slider/slider'
+  import Scroll from 'base/scroll/scroll'
   import {getRecommend} from 'api/recommend'
   import {ERR_OK} from 'api/config'
 
@@ -54,11 +55,54 @@
       }
     },
     components: {
-      Slider
+      Slider,
+      Scroll
     }
   }
 </script>
 
 <style scoped lang="stylus">
 	@import "~common/stylus/variable"
+
+	.recommend
+		position: relative
+		width: 100%
+		top: 88px
+		bottom: 0
+		.recommend-content
+			height: 100%
+			overflow: hidden
+			.slider-wrapper
+				position: relative
+				width: 100%
+				overflow: hidden
+			.recommend-list
+				.list-title
+					height: 65px
+					line-height: 65px
+					text-align: center
+					font-size: $font-size-medium
+					color: $color-theme
+				.item
+					display: flex
+					box-sizing: border-box
+					align-items: center
+					padding: 0 20px 20px 20px
+					.icon
+						flex: 0 0 60px
+						width: 60px
+						padding-right: 20px
+					.text
+						display: flex
+						flex-direction: column
+						justify-content: center
+						flex: 1
+						line-height: 20px
+						overflow: hidden
+						font-size: $font-size-medium
+						.name
+							margin-bottom: 10px
+							color: $color-text
+						.desc
+							color: $color-text-d
 </style>

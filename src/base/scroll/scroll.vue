@@ -43,7 +43,7 @@
         if (this.listenScroll) {
           let me = this
           this.scroll.on('scroll', (pos) => {
-            me.$emit('scroll', pos)
+            me.$emit('scroll', pos)// 派发事件，在listview中监听scroll事件
           })
         }
       },

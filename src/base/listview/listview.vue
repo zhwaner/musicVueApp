@@ -16,14 +16,22 @@
         <li v-for="(item,index) in shortcutList" :data-index="index" class="item" :class="{'current': index === currentIndex}">{{item}}</li>
       </ul>
     </div>
+    <div class="list-fixed" v-show="fixedTitle" ref="fixed">
+      <h1 class="fixed-title">{{fixedTitle}}</h1>
+    </div>
+    <div v-show="!data.length" class="loading-container">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
 <script>
   import Scroll from 'base/scroll/scroll'
+  import Loading from 'base/loading/loading'
   import {getData} from 'common/js/dom'
 
   const ANCHOR_HEIGHT = 18 // 右侧首字母导航一个字母的高度
+  const TITLE_HEIGHT = 30
 
   export default {
     created() {
@@ -35,7 +43,8 @@
     data() {
       return {
         scrollY: -1, // 滚动的距离
-        currentIndex: 0 // 高亮index
+        currentIndex: 0, // 高亮index
+        diff: -1
       }
     },
     props: {
@@ -49,6 +58,12 @@
         return this.data.map((group) => {
           return group.title.substr(0, 1)
         })
+      },
+      fixedTitle() {
+        if (this.scrollY > 0) {
+          return ''
+        }
+        return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
       }
     },
     methods: {
@@ -71,6 +86,20 @@
         this.scrollY = pos.y
       },
       _scrollTo(index) {
+        console.log(index)
+        // 没有点击到导航的时候
+        if (!index && index !== 0) {
+          return
+        }
+        // 当点击拖动到上面超出导航的时候
+        if (index < 0) {
+          index = 0
+        }
+        // 当点击拖动到下面超出导航的时候
+        if (index > this.listHeight.length - 2) {
+          index = this.listHeight.length - 2
+        }
+        this.scrollY = -this.listHeight[index]
         this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0)// 第二个参数为移动是否要动画
       },
       _calculateHeight() {
@@ -83,7 +112,6 @@
           height += item.clientHeight
           this.listHeight.push(height)
         }
-        console.log(this.listHeight)
       }
     },
     watch: {
@@ -94,20 +122,39 @@
       },
       scrollY(newY) {
         const listHeight = this.listHeight
-        for (let i = 0; i < listHeight.length; i++) {
+        // 当滚动到顶部，newY>0
+        if (newY > 0) {
+          this.currentIndex = 0
+          return
+        }
+        // 在中间部分滚动，listHeight的个数比index的个数多1
+        for (let i = 0; i < listHeight.length - 1; i++) {
           let height1 = listHeight[i]
           let height2 = listHeight[i + 1]
-          if (!height2 || (-newY >= height1 && -newY < height2)) {
+          if (-newY >= height1 && -newY < height2) {
             this.currentIndex = i
+            this.diff = height2 + newY // 下限与滑动距离的偏差值
             console.log(this.currentIndex)
             return
           }
         }
-        this.currentIndex = 0
+        // 当滚动到底部，且-newY大于最后一个元素的上限
+        this.currentIndex = listHeight - 2
+      },
+      // 距离fixed框的距离
+      diff(newVal) {
+        let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0
+        console.log(fixedTop + '====' + this.fixedTop)
+        if (this.fixedTop === fixedTop) {
+          return
+        }
+        this.fixedTop = fixedTop
+        this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)` // 开启3d加速
       }
     },
     components: {
-      Scroll
+      Scroll,
+      Loading
     }
   }
 </script>

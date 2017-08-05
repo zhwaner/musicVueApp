@@ -71,7 +71,6 @@ export default {
           hot.push(val)
         }
       }
-      console.log(ret)
       ret.sort((a, b) => {
         return a.title.charCodeAt(0) - b.title.charCodeAt(0)
       })

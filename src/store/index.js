@@ -15,6 +15,6 @@ export default new Vuex.Store({
   getters,
   state,
   mutations,
-  strict: debug,
-  plugins: debug ? [createLogger()] : []
+  strict: debug, // 开发环境使用严格模式
+  plugins: debug ? [createLogger()] : [] // 修改state时在控制台输出日志
 })

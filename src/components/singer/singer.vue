@@ -83,6 +83,7 @@ export default {
       })
       return hot.concat(ret)
     },
+    // 映射 this.setSinger() 为 this.$store.commit('SET_SINGER')
     ...mapMutations({
       setSinger: 'SET_SINGER'
     }) // 扩展运算符，mutation-types定义的

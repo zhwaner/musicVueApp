@@ -6,15 +6,38 @@
 
 <script>
   import {mapGetters} from 'vuex'
+  import {getSingerDetail} from 'api/singer'
+  import {ERR_OK} from 'api/config'
+  import {createSong} from 'common/js/song'
 
   export default {
+    data() {
+      song: []
+    },
     computed: {
       ...mapGetters([
         'singer'
       ])
     },
     created() {
-      console.log(this.singer)
+      this._getDetail()
+    },
+    methods: {
+      _getDetail() {
+        // 处理边界情况：当用户刷新当前页面时，vuex中state是没有值的，让用户回退到歌手列表
+        if (!this.singer.id) {
+          this.$router.push('/singer')
+          return
+        }
+        getSingerDetail(this.singer.id).then(res => {
+          if (res.code === ERR_OK) {
+            console.log(res.data)
+          }
+        })
+      }
+    },
+    _normalizeSongs(list) {
+
     }
   }
 </script>

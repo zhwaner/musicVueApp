@@ -5,9 +5,10 @@
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref='bgImage'>
-      <div class="filter"></div>
+      <div class="filter" ref="filter"></div>
     </div>
-    <scroll :data="songs" class="list" ref="list">
+    <div class="bg-layer" ref="layer"></div> <!-- 歌曲滚动也跟着滚动的层 -->
+    <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
       </div>
@@ -18,6 +19,8 @@
 <script>
   import Scroll from 'base/scroll/scroll'
   import songList from 'base/song-list/song-list'
+
+  const RESERVED_HEIGHT = 40
 
   export default {
     props: {
@@ -34,14 +37,61 @@
         default: ''
       }
     },
+    data() {
+      return {
+        scrollY: 0
+      }
+    },
     computed: {
       bgStyle() {
         return `background-image:url(${this.bgImage})`
       }
     },
+    created() {
+      this.probeType = 3
+      this.listenScroll = true
+    },
     mounted() {
       console.log(this.$refs.list)
-      this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px`
+      this.imageHeight = this.$refs.bgImage.clientHeight
+      this.minTranslateY = -this.imageHeight + RESERVED_HEIGHT
+      this.$refs.list.$el.style.top = `${this.imageHeight}px`
+    },
+    methods: {
+      scroll(pos) {
+        this.scrollY = pos.y
+      }
+    },
+    watch: {
+      scrollY(newY) {
+        console.log(newY)
+        let translateY = Math.max(this.minTranslateY, newY) // 背景跟着滑动的效果
+        let zIndex = 0
+        let scale = 1 // 实现歌单往下拉时歌手图片放大的效果
+        let blur = 0 // 往上滑的时候背景图片越来越模糊（高斯模糊）的效果
+        this.$refs.layer.style['transform'] = `translate3d(0, ${translateY}px, 0)`
+        this.$refs.layer.style['webkitTransform'] = `translate3d(0, ${translateY}px, 0)`
+        const percent = Math.abs(newY / this.imageHeight)
+        if (newY > 0) { // 歌曲列表往下拉时
+          scale = 1 + percent // bgImage的高度也会加上newY的高度，放大的效果从上往下是因为设置了transform-origin：top
+          zIndex = 10
+        } else { // 歌曲列表往上滑时
+          blur = Math.min(20 * percent, 20) // 模糊最大20
+        }
+        if (newY < this.minTranslateY) {
+          zIndex = 10
+          this.$refs.bgImage.style.paddingTop = 0
+          this.$refs.bgImage.style.height = `${RESERVED_HEIGHT}px`
+        } else {
+          this.$refs.bgImage.style.paddingTop = '70%'
+          this.$refs.bgImage.style.height = 0
+        }
+        this.$refs.bgImage.style.zIndex = zIndex
+        this.$refs.bgImage.style['transform'] = `scale(${scale})`
+        this.$refs.bgImage.style['webkitTransform'] = `scale(${scale})`
+        this.$refs.filter.style['backdrop-filter'] = `blur(${blur}px)` // backdrop-filter属性只有ios支持，安卓手机不支持。做渐进增强
+        this.$refs.filter.style['webkitBackdrop-filter'] = `blur(${blur}px)`
+      }
     },
     components: {
       Scroll,
@@ -85,7 +135,6 @@
       color: $color-text
     .bg-image
       position: relative
-      z-index: 10
       width: 100%
       height: 0
       padding-top: 70%
